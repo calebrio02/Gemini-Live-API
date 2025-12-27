@@ -1,0 +1,11 @@
+services:
+  gemini-live:
+    build: .
+    container_name: gemini-live
+    restart: unless-stopped
+    ports:
+      - "3600:3600"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=3600
+      - DEFAULT_VOICE=Kore
