@@ -8,42 +8,67 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>✨ Gemini Voice Chat</h1>
-            <p class="subtitle">Real-time voice conversations with AI</p>
-        </header>
-
-        <main>
-            <!-- Status indicator -->
-            <div class="status-bar">
+    <div class="app-wrapper">
+        <header class="glass-header">
+            <div class="logo-area">
+                <span class="logo-icon">✨</span>
+                <h1>Gemini Live</h1>
+            </div>
+            <div class="status-badge" id="statusBadge">
                 <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Ready</span>
             </div>
+            <button class="icon-button small" id="settingsToggle" title="Settings">
+                ⚙️
+            </button>
+        </header>
 
-            <!-- Voice visualization -->
-            <div class="visualizer-container">
-                <div class="visualizer" id="visualizer">
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
+        <main class="glass-panel main-panel">
+
+            <!-- Chat History Area -->
+            <div class="chat-container custom-scrollbar" id="chatContainer">
+                <div class="welcome-message">
+                    <h2>Hello! 👋</h2>
+                    <p>Start a conversation to chat with Gemini.</p>
                 </div>
-                <div class="ai-avatar" id="aiAvatar">
-                    <span>🤖</span>
+                <!-- Messages will be injected here -->
+            </div>
+
+            <!-- Visualization & Avatar Area (Center) -->
+            <div class="active-interaction-area">
+                <div class="visualizer-container">
+                    <div class="visualizer" id="visualizer">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Main control button -->
-            <div class="controls-row">
+            <!-- Video Preview (Floating) -->
+            <div class="camera-preview-container" id="cameraPreview">
+                <div class="camera-overlay"></div>
+                <video id="localVideo" autoplay playsinline muted></video>
+            </div>
+
+            <!-- Hidden Canvas -->
+            <canvas id="videoCanvas" style="display: none;"></canvas>
+
+        </main>
+
+        <!-- Controls Area (Now separate footer) -->
+        <div class="controls-area glass-controls">
+
+            <div class="action-buttons">
                 <button class="icon-button" id="cameraStartBtn" title="Toggle Camera">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" style="width: 24px; height: 24px;">
+                        stroke-linejoin="round">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
                         </path>
                         <circle cx="12" cy="13" r="4"></circle>
@@ -52,43 +77,47 @@
 
                 <button class="icon-button" id="switchCameraBtn" title="Switch Camera" style="display: none;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" style="width: 24px; height: 24px;">
+                        stroke-linejoin="round">
                         <path d="M20 5H9l-7 7 7 7h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path>
                         <path d="M14 8l-2 2 2 2"></path>
                     </svg>
                 </button>
 
-                <button class="talk-button" id="talkButton">
-                    <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                        <path
-                            d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                <button class="icon-button" id="toggleTranscriptBtn" title="Show/Hide Transcript">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
-                    <span id="buttonText">Start Conversation</span>
                 </button>
             </div>
 
-            <!-- Video Preview -->
-            <div class="camera-preview" id="cameraPreview">
-                <video id="localVideo" autoplay playsinline muted></video>
+            <div class="main-action">
+                <button class="talk-button" id="talkButton">
+                    <div class="mic-wrapper">
+                        <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                            <path
+                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                        </svg>
+                    </div>
+                    <span id="buttonText">Start Chat</span>
+                </button>
             </div>
 
-            <!-- Hidden Canvas for frame extraction -->
-            <canvas id="videoCanvas" style="display: none;"></canvas>
+        </div>
 
-            <!-- Transcript (optional) -->
-            <div class="transcript" id="transcript">
-                <div class="transcript-content" id="transcriptContent"></div>
-            </div>
-        </main>
+        <!-- Settings Modal (Overlay) -->
+        <div class="settings-modal" id="settingsPanel">
+            <div class="settings-content glass-panel">
+                <div class="settings-header">
+                    <h3>Settings</h3>
+                    <button class="close-button" id="closeSettings">×</button>
+                </div>
 
-        <!-- Settings panel -->
-        <aside class="settings-panel" id="settingsPanel">
-            <button class="settings-toggle" id="settingsToggle">
-                ⚙️ Settings
-            </button>
-
-            <div class="settings-content" id="settingsContent">
                 <div class="setting-group">
                     <label for="voiceSelect">Voice</label>
                     <select id="voiceSelect"></select>
@@ -99,12 +128,14 @@
                     <textarea id="systemPrompt" rows="4" placeholder="You are a helpful assistant..."></textarea>
                 </div>
 
-                <p class="settings-hint">Changes apply on next conversation start</p>
+                <div class="settings-footer">
+                    <p>Changes apply on next conversation start</p>
+                </div>
             </div>
-        </aside>
+        </div>
     </div>
 
-    <script src="js/app.js?v=2"></script>
+    <script src="js/app.js?v=3"></script>
 </body>
 
 </html>

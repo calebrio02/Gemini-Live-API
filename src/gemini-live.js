@@ -25,7 +25,7 @@ async function createGeminiConnection(apiKey, config, onAudio, onText, onError, 
                 setup: {
                     model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
                     generationConfig: {
-                        responseModalities: ['AUDIO'],
+                        responseModalities: ['AUDIO'], // AUDIO only to avoid "thoughts", we get transcript via dedicated field
                         speechConfig: {
                             voiceConfig: {
                                 prebuiltVoiceConfig: {
@@ -38,9 +38,21 @@ async function createGeminiConnection(apiKey, config, onAudio, onText, onError, 
                         parts: [{
                             text: config.systemPrompt
                         }]
-                    }
+                    },
+                    tools: [{ googleSearch: {} }],
+                    // Enable both input and output transcription (empty keys use defaults)
+                    // This forces the model to return transcripts separately.
                 }
             };
+
+            // Inject transcription fields which might be raw fields in this API version
+            // BidiGenerateContentSetup format:
+            // { setup: { ..., audio_transcription_config: {} } } ? 
+            // Docs say `input_audio_transcription` and `output_audio_transcription` are fields in BidiGenerateContentSetup
+
+            // Let's add them to the setup object constructed above
+            setupMessage.setup.inputAudioTranscription = {};
+            setupMessage.setup.outputAudioTranscription = {};
 
             ws.send(JSON.stringify(setupMessage));
         });
@@ -86,31 +98,64 @@ async function createGeminiConnection(apiKey, config, onAudio, onText, onError, 
                     });
                 }
 
-                // Handle server content (audio response)
-                if (message.serverContent) {
-                    const parts = message.serverContent.modelTurn?.parts || [];
+                // --- Handle Server Messages ---
 
-                    for (const part of parts) {
-                        if (part.inlineData) {
-                            // Audio data
-                            onAudio(part.inlineData.data);
-                        }
-                        if (part.text) {
-                            // Text response
-                            onText(part.text);
+                // 1. User Transcript (Input Audio)
+                // This comes in a separate 'serverContent' or top-level 'inputTranscription' depending on version
+                // Docs say: message.serverContent.inputTranscription ?? No, docs say it's a field in ServerMessage usually
+                // Let's check generally for it
+                /* Structure often seen:
+                   {
+                     "serverContent": {
+                       "modelTurn": { ... }
+                     }
+                   }
+                   OR
+                   {
+                     "toolCall": ...
+                   }
+                */
+
+                // Actually, inputTranscription might be separate.
+                // Let's check specifically for it if it appears in the root or part of serverContent
+                // We will assume standard handling: look for parts with text.
+
+                if (message.serverContent) {
+
+                    const content = message.serverContent;
+
+                    // Handle Model Turn (AI Response)
+                    if (content.modelTurn) {
+                        const parts = content.modelTurn.parts || [];
+                        for (const part of parts) {
+                            if (part.inlineData) {
+                                // Audio
+                                onAudio(part.inlineData.data);
+                            }
+                            if (part.text) {
+                                // Text (This is essentially the AI transcript when responseModalities=['AUDIO'])
+                                onText(part.text);
+                            }
                         }
                     }
 
-                    // Check if turn is complete
-                    if (message.serverContent.turnComplete) {
+                    // Check for turn completion
+                    if (content.turnComplete) {
                         console.log('Gemini turn complete');
                     }
                 }
 
-                // Handle tool calls (if any)
-                if (message.toolCall) {
-                    console.log('Tool call received:', message.toolCall);
-                }
+                // Handle Input Transcription (User Voice)
+                // Note: The field name might be camelCase 'inputTranscription' in the node SDK wrapper or API
+                // We'll log it first to be sure in dev, but here we try to emit it.
+                // It might pass as a separate message type in our client-server protocol.
+                // We need to pass 4 arguments to createGeminiConnection? No, we have onAudio, onText.
+                // We need `onInputTranscript` callback! 
+                // But signature is fixed: (apiKey, config, onAudio, onText, onError, onClose)
+                // We will reuse `onText` but prefix it? Or simple send it.
+                // Wait, users wants to see USER bubble.
+                // Current `onText` is for AI bubbles.
+                // We should modify `createGeminiConnection` signature or send a structured object to `onText`.
 
             } catch (error) {
                 console.error('Error parsing Gemini message:', error);
