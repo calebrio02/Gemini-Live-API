@@ -2,7 +2,7 @@
  * Gemini Live API Client
  * Handles WebSocket connection to Gemini's real-time audio API
  */
-
+//
 const WebSocket = require('ws');
 
 const GEMINI_LIVE_URL = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent';
