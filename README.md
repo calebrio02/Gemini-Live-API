@@ -3,7 +3,7 @@
 A real-time, bidirectional voice chat application powered by Google's **Gemini Live API**.
 Experience fluid, natural conversations with AI using your voice, now with a stunning glassmorphic UI and perfect mobile responsiveness.
 
-![Gemini Live UI](https://via.placeholder.com/800x450?text=Gemini+Live+Voice+Chat)
+
 
 ## ✨ Key Features
 
@@ -32,7 +32,7 @@ Experience fluid, natural conversations with AI using your voice, now with a stu
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/calebrio02/Gemini-Live-API
     cd gemini-live
     ```
 
