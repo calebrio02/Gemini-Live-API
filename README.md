@@ -34,7 +34,7 @@ Experience fluid, natural conversations with AI using your voice, now with a stu
 1.  **Clone the repository**:
     ```bash
     git clone https://github.com/calebrio02/Gemini-Live-API
-    cd gemini-live
+    cd Gemini-Live-API
     ```
 
 2.  **Configure Environment**:
