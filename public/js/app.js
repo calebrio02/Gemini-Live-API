@@ -9,6 +9,7 @@ class GeminiVoiceChat {
         this.talkButton = document.getElementById('talkButton');
         this.buttonText = document.getElementById('buttonText');
         this.cameraStartBtn = document.getElementById('cameraStartBtn');
+        this.shareScreenBtn = document.getElementById('shareScreenBtn');
         this.switchCameraBtn = document.getElementById('switchCameraBtn');
         this.toggleTranscriptBtn = document.getElementById('toggleTranscriptBtn');
         this.localVideo = document.getElementById('localVideo');
@@ -16,8 +17,7 @@ class GeminiVoiceChat {
         this.cameraPreview = document.getElementById('cameraPreview');
         this.statusDot = document.getElementById('statusDot');
         this.statusText = document.getElementById('statusText');
-        this.visualizer = document.getElementById('visualizer');
-        this.visualizerContainer = document.querySelector('.active-interaction-area');
+        this.visualizerContainer = null; // Removed per user request
 
         // Settings Elements
         this.settingsToggle = document.getElementById('settingsToggle');
@@ -33,6 +33,7 @@ class GeminiVoiceChat {
         // State
         this.isActive = false;
         this.isVideoActive = false;
+        this.isScreenSharing = false;
         this.currentFacingMode = 'user'; // 'user' or 'environment'
         this.ws = null;
         this.audioContext = null;
@@ -76,6 +77,7 @@ class GeminiVoiceChat {
     setupEventListeners() {
         this.talkButton.addEventListener('click', () => this.toggleConversation());
         this.cameraStartBtn.addEventListener('click', () => this.toggleCamera());
+        this.shareScreenBtn.addEventListener('click', () => this.toggleScreenShare());
         this.switchCameraBtn.addEventListener('click', () => this.switchCamera());
         this.settingsToggle.addEventListener('click', () => this.toggleSettings(true));
         this.closeSettings.addEventListener('click', () => this.toggleSettings(false));
@@ -280,9 +282,51 @@ class GeminiVoiceChat {
 
         this.localVideo.srcObject = null;
         this.isVideoActive = false;
+        this.isScreenSharing = false;
         this.cameraStartBtn.classList.remove('active');
+        this.shareScreenBtn.classList.remove('active');
         this.cameraPreview.classList.remove('active');
         this.switchCameraBtn.style.display = 'none';
+    }
+
+    async toggleScreenShare() {
+        if (this.isScreenSharing) {
+            this.stopCamera();
+        } else {
+            await this.startScreenShare();
+        }
+    }
+
+    async startScreenShare() {
+        try {
+            // Stop existing camera/video if active
+            if (this.isVideoActive || this.isScreenSharing) {
+                this.stopCamera();
+            }
+
+            this.videoStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { cursor: "always" },
+                audio: false
+            });
+
+            this.localVideo.srcObject = this.videoStream;
+            this.isVideoActive = true;
+            this.isScreenSharing = true;
+
+            this.shareScreenBtn.classList.add('active');
+            this.cameraPreview.classList.add('active');
+            this.switchCameraBtn.style.display = 'none';
+
+            // Handle when user stops sharing via browser bar
+            this.videoStream.getTracks()[0].onended = () => {
+                if (this.isScreenSharing) this.stopCamera();
+            };
+
+            if (this.isActive) this.startVideoTransmission();
+        } catch (error) {
+            console.error('Screen sharing failed:', error);
+            this.isScreenSharing = false;
+        }
     }
 
     startVideoTransmission() {
@@ -400,7 +444,6 @@ class GeminiVoiceChat {
 
     async playAudio(base64Data) {
         this.setStatus('speaking', 'Gemini speaking...');
-        this.visualizerContainer.classList.add('active'); // Show visualizer in center
 
         try {
             const pcmData = this.base64ToArrayBuffer(base64Data);
@@ -430,7 +473,6 @@ class GeminiVoiceChat {
         source.onended = () => {
             if (this.audioContext && this.audioContext.currentTime >= this.nextPlayTime - 0.1) {
                 this.setStatus('connected', 'Listening...');
-                this.visualizerContainer.classList.remove('active');
             }
         };
     }
@@ -440,7 +482,6 @@ class GeminiVoiceChat {
         this.setStatus('', 'Ready');
         this.talkButton.classList.remove('active');
         this.buttonText.textContent = 'Start Chat';
-        this.visualizerContainer.classList.remove('active');
 
         if (this.ws) {
             this.ws.send(JSON.stringify({ type: 'stop' }));

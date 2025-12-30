@@ -14,12 +14,12 @@ Experience fluid, natural conversations with AI using your voice, now with a stu
 - **Premium Glassmorphism UI**:
     - Translucent panels with background blur.
     - Deep, dynamic gradients inspired by modern aesthetics.
-    - Smooth animations for voice activity and chat bubbles.
+    - Clean chat bubble interface for clear conversation flow.
 - **Mobile First Experience**:
     - Adaptive layout (`100dvh`) that fits perfectly on mobile browsers.
     - Sticky controls that never get lost.
     - Optimized touch targets.
-- **Camera Support** (Experimental): Toggle your camera to share visual context with Gemini.
+- **Camera & Screen Sharing**: Toggle your camera or share your screen to give Gemini real-time visual context for code reviews or troubleshooting.
 
 ## 🚀 Getting Started
 
@@ -71,7 +71,8 @@ Experience fluid, natural conversations with AI using your voice, now with a stu
     - **AI Bubbles (Left)**: Gemini's audio response, transcribed in real-time.
 4.  **Controls**:
     - **Toggle Transcript**: Show/hide the text history.
-    - **Camera**: Enable video input.
+    - **Camera**: Share your camera stream.
+    - **Screen Share**: Share your screen/window for troubleshooting.
     - **Settings**: Change voice tone (Kore, Fenrir, Aoede, etc.) or system prompt.
 
 ## 🤝 Contributing
