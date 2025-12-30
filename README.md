@@ -2,7 +2,7 @@
 
 A real-time, bidirectional voice chat application powered by Google's **Gemini Live API**.
 Experience fluid, natural conversations with AI using your voice, now with a stunning glassmorphic UI and perfect mobile responsiveness.
-
+![Gemini Live UI](screenshot.png)
 
 
 ## ✨ Key Features
