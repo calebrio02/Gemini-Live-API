@@ -1,76 +1,82 @@
-# Gemini Voice Chat
+# 🎙️ Gemini Live Voice Chat
 
-Real-time voice conversations with Google Gemini using native audio.
+A real-time, bidirectional voice chat application powered by Google's **Gemini Live API**.
+Experience fluid, natural conversations with AI using your voice, now with a stunning glassmorphic UI and perfect mobile responsiveness.
 
-## ✨ Features
+![Gemini Live UI](https://via.placeholder.com/800x450?text=Gemini+Live+Voice+Chat)
 
-- 🎙️ **Real-time voice chat** - Natural conversations with barge-in support
-- 📹 **Multimodal Video** - Share your camera feed with Gemini for vision analysis
-- 📸 **Camera Switching** - Support for front/back cameras on mobile devices
-- 🔊 **30 HD voices** - Choose from Gemini's voice options
-- 📝 **Editable system prompt** - Change AI personality from the UI
-- 🐳 **Docker ready** - Easy deployment
+## ✨ Key Features
 
-## 🚀 Quick Start
+- **Real-time Voice Conversation**: Talk naturally to Gemini with continuous, low-latency audio streaming.
+- **Improved Transcription System**:
+    - **Dual-Channel Transcription**: See your own words (blue bubbles) and Gemini's responses (white bubbles) in real-time.
+    - **Smart Text Merging**: Advanced frontend logic eliminates visual stuttering and duplication by intelligently merging streaming text chunks.
+- **Premium Glassmorphism UI**:
+    - Translucent panels with background blur.
+    - Deep, dynamic gradients inspired by modern aesthetics.
+    - Smooth animations for voice activity and chat bubbles.
+- **Mobile First Experience**:
+    - Adaptive layout (`100dvh`) that fits perfectly on mobile browsers.
+    - Sticky controls that never get lost.
+    - Optimized touch targets.
+- **Camera Support** (Experimental): Toggle your camera to share visual context with Gemini.
 
-### 1. Configure API Key
+## 🚀 Getting Started
 
-Create `.env` file:
-```bash
-GEMINI_API_KEY=your-api-key-here
-```
+### Prerequisites
 
-### 2. Start with Docker
+- [Docker](https://www.docker.com/) installed.
+- A **Google Gemini API Key** (get it from [Google AI Studio](https://aistudio.google.com/)).
 
-```bash
-docker-compose up --build
-```
+### Installation
 
-### 3. Open in Browser
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd gemini-live
+    ```
 
-Navigate to `http://localhost:3600`
+2.  **Configure Environment**:
+    Create a `.env` file in the root directory:
+    ```env
+    # .env
+    GEMINI_API_KEY=your_api_key_here
+    PORT=3600
+    DEFAULT_VOICE=Kore
+    ```
 
-> ⚠️ **IMPORTANT: HTTPS Requirement**
-> 
-> To use the microphone and camera from a device other than your local computer (e.g., your phone on the same Wi-Fi), **you need a Secure Context (HTTPS)**.
-> 
-> Browsers block media access on `http://` unless it is `localhost`.
-> 
-> **Workarounds for Local Testing:**
-> 1.  **Use Localhost**: Access only from the computer running the server.
-> 2.  **Chrome Flags (Android/Desktop)**:
->     -   Go to `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
->     -   Enable it and add your server IP: `http://192.168.1.X:3600`
-> 3.  **Tunneling**: Use a tool like `ngrok` or `cloudflared` to get a temporary HTTPS URL.
+3.  **Run with Docker**:
+    ```bash
+    docker-compose up --build
+    ```
 
-## ⚙️ Configuration
+4.  **Access the App**:
+    Open your browser (Chrome/Edge recommended) and go to:
+    `http://localhost:3600`
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GEMINI_API_KEY` | Gemini API key | Required |
-| `PORT` | Server port | `3600` |
-| `DEFAULT_VOICE` | Default voice | `Kore` |
+    *Note: For mobile devices on the same network, use your computer's local IP address (e.g., `https://192.168.1.x:3600`). You may need to set up HTTPS or allow insecure origins for microphone access.*
 
-## 🎤 Available Voices
+## 🛠️ Tech Stack
 
-Aoede, Charon, Fenrir, Kore, Puck, Zephyr, Achernar, Achird, Algenib, Algieba, Alnilam, Autonoe, Callirrhoe, Despina, Enceladus, Erinome, Gacrux, Iapetus, Laomedeia, Leda, Orus, Pulcherrima, Rasalgethi, Sadachbia, Sadaltager, Schedar, Sulafat, Umbriel, Vindemiatrix, Zubenelgenubi
+- **Backend**: Node.js, Express, `ws` (WebSocket), Gemini Multimodal Live API.
+- **Frontend**: Vanilla JavaScript, CSS3 (Glassmorphism), WebSocket API, Web Audio API.
+- **Infrastructure**: Docker, Docker Compose.
 
-## 📋 Requirements
+## 📝 Usage Guide
 
-- Docker
-- Gemini API Key with access to native audio models
-- Modern browser (Chrome/Edge recommended)
-- Microphone & Camera
+1.  **Start Chat**: Click the microphone button to begin.
+2.  **Speak**: Talk naturally. The "Listening..." indicator will pulse.
+3.  **Read**: Watch the conversation unfold in the transcript view.
+    - **User Bubbles (Right)**: Your speech, transcribed by Gemini.
+    - **AI Bubbles (Left)**: Gemini's audio response, transcribed in real-time.
+4.  **Controls**:
+    - **Toggle Transcript**: Show/hide the text history.
+    - **Camera**: Enable video input.
+    - **Settings**: Change voice tone (Kore, Fenrir, Aoede, etc.) or system prompt.
 
-## 💡 Usage Tips
+## 🤝 Contributing
 
-1. Click "Start Conversation" to begin
-2. Allow microphone access when prompted
-3. **Toggle Camera**: Click the camera icon to enable video vision
-4. **Switch Camera**: On mobile, use the rotate button to switch between front/back cameras
-5. Speak naturally - Gemini will respond with voice
-6. Change voice or system prompt in Settings (changes apply on next start)
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
-
-MIT
+---
+*Built with ❤️ using Gemini API*

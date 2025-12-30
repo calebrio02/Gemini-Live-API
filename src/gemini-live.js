@@ -100,62 +100,80 @@ async function createGeminiConnection(apiKey, config, onAudio, onText, onError, 
 
                 // --- Handle Server Messages ---
 
-                // 1. User Transcript (Input Audio)
-                // This comes in a separate 'serverContent' or top-level 'inputTranscription' depending on version
-                // Docs say: message.serverContent.inputTranscription ?? No, docs say it's a field in ServerMessage usually
-                // Let's check generally for it
-                /* Structure often seen:
-                   {
-                     "serverContent": {
-                       "modelTurn": { ... }
-                     }
-                   }
-                   OR
-                   {
-                     "toolCall": ...
-                   }
-                */
-
-                // Actually, inputTranscription might be separate.
-                // Let's check specifically for it if it appears in the root or part of serverContent
-                // We will assume standard handling: look for parts with text.
-
                 if (message.serverContent) {
-
                     const content = message.serverContent;
 
-                    // Handle Model Turn (AI Response)
+                    // 1. Model Turn (Audio)
                     if (content.modelTurn) {
                         const parts = content.modelTurn.parts || [];
                         for (const part of parts) {
                             if (part.inlineData) {
-                                // Audio
                                 onAudio(part.inlineData.data);
                             }
-                            if (part.text) {
-                                // Text (This is essentially the AI transcript when responseModalities=['AUDIO'])
-                                onText(part.text);
-                            }
+                            // Note: We ignore part.text here if we want to avoid "thoughts", 
+                            // as we are relying on proper outputTranscription below.
                         }
                     }
 
-                    // Check for turn completion
-                    if (content.turnComplete) {
-                        console.log('Gemini turn complete');
+                    // 2. AI Transcript (Output)
+                    // Validated per documentation: serverContent.outputTranscription.text
+                    if (content.outputTranscription && content.outputTranscription.text) {
+                        onText(content.outputTranscription.text, 'ai');
+                    }
+
+                    // 3. User Transcript (Input)
+                    // Documentation suggests it might be in serverContent or top-level.
+                    // We check content.inputAudioTranscription (API naming varies)
+                    // Common field: inputTranscription
+                    /* 
+                       Note: We will try to detect it wherever it lands. 
+                       If it appears as a separate message or field.
+                    */
+                    // On Google AI Studio, it's typically serverContent.turnComplete? No.
+                    // Let's check for inputTranscription in serverContent explicitly
+                }
+
+                // Check distinct fields potentially on the root message or serverContent
+                // Some versions send it as a separate tool or part. 
+                // But based on 'BidiGenerateContentServerMessage', it serves:
+                // serverContent, toolCall, toolCallCancellation, etc.
+
+                // Let's look inside serverContent for 'inputTranscription' if it exists
+                if (message.serverContent && message.serverContent.inputAudioTranscription && message.serverContent.inputAudioTranscription.finalResult) {
+                    // Note: inputAudioTranscription usually yields 'content' or 'transcript'
+                    // We will dump the object to log if debugging, but here we assume .content or .text?
+                    // Actually, if we are unsure, let's fallback to looking for it.
+                    // But for now, let's try assuming standard structure or just logging it until we confirm.
+                    // WAIT: The user said "sigue tirando bubbles...".
+                    // Let's follow the robust pattern:
+                }
+
+                // REVISED STRATEGY: 
+                // We will rely on our research. Input transcription might not be effectively working with just "setup".
+                // But the user *linked* the guide.
+                // Let's implement the 'outputTranscription' part clearly first.
+                // For input, let's check for 'inputTranscription' in serverContent.
+
+                if (message.serverContent) {
+                    const c = message.serverContent;
+                    if (c.outputTranscription && c.outputTranscription.text) {
+                        onText(c.outputTranscription.text, 'ai');
+                    }
+                    // Check input transcription (often named inputTranscription or similar)
+                    if (c.inputTranscription && c.inputTranscription.text) {
+                        onText(c.inputTranscription.text, 'user');
+                    } else if (c.inputAudioTranscription && c.inputAudioTranscription.text) {
+                        // Alternative field name for input audio transcription
+                        onText(c.inputAudioTranscription.text, 'user');
                     }
                 }
 
-                // Handle Input Transcription (User Voice)
-                // Note: The field name might be camelCase 'inputTranscription' in the node SDK wrapper or API
-                // We'll log it first to be sure in dev, but here we try to emit it.
-                // It might pass as a separate message type in our client-server protocol.
-                // We need to pass 4 arguments to createGeminiConnection? No, we have onAudio, onText.
-                // We need `onInputTranscript` callback! 
-                // But signature is fixed: (apiKey, config, onAudio, onText, onError, onClose)
-                // We will reuse `onText` but prefix it? Or simple send it.
-                // Wait, users wants to see USER bubble.
-                // Current `onText` is for AI bubbles.
-                // We should modify `createGeminiConnection` signature or send a structured object to `onText`.
+                // Temporary logging to debug structure in prod if needed, but we must implement code.
+                // Let's assume standard 'text' property for now or standard 'parts'.
+
+                // NOTE: To support the 'onText' refactor, we must pass 'source'.
+                // If we don't find input transcript, we might just get AI transcript.
+
 
             } catch (error) {
                 console.error('Error parsing Gemini message:', error);

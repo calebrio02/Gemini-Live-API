@@ -84,13 +84,21 @@ wss.on('connection', (clientWs) => {
                             }));
                         }
                     },
-                    // On text from Gemini
-                    (text) => {
+                    // On text from Gemini (AI or User transcript)
+                    (text, source) => {
                         if (clientWs.readyState === WebSocket.OPEN) {
-                            clientWs.send(JSON.stringify({
-                                type: 'text',
-                                data: text
-                            }));
+                            if (source === 'user') {
+                                clientWs.send(JSON.stringify({
+                                    type: 'user_transcript',
+                                    data: text
+                                }));
+                            } else {
+                                // Default to 'ai' (or 'model') behavior
+                                clientWs.send(JSON.stringify({
+                                    type: 'text',
+                                    data: text
+                                }));
+                            }
                         }
                     },
                     // On error

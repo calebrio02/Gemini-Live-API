@@ -309,15 +309,64 @@ class GeminiVoiceChat {
 
     // Chat UI Methods
     addMessage(text, sender) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}`;
-        messageDiv.textContent = text;
-        this.chatContainer.appendChild(messageDiv);
+        const lastMessage = this.chatContainer.lastElementChild;
+        const isSameSender = lastMessage && lastMessage.classList.contains(sender);
+
+        if (isSameSender) {
+            const currentText = lastMessage.textContent;
+            // Usamos la nueva función de fusión inteligente
+            lastMessage.textContent = this.mergeTextStream(currentText, text);
+        } else {
+            // New message bubble
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            this.chatContainer.appendChild(messageDiv);
+        }
+
         this.scrollToBottom();
     }
 
+    /**
+     * Fusiona el texto actual con el nuevo fragmento detectando solapamientos.
+     * Evita el efecto "tartamudeo" (ej: "puedo qué puedo").
+     */
+    mergeTextStream(current, incoming) {
+        // 1. Caso Acumulativo Perfecto: El nuevo texto es una actualización completa del anterior.
+        // Ejemplo: Current="Hola", Incoming="Hola mundo"
+        if (incoming.startsWith(current)) {
+            return incoming;
+        }
+
+        // 2. Limpieza básica para evitar falsos negativos por espacios al final
+        const currentTrim = current.trimEnd();
+
+        // 3. Detección de Solapamiento (Overlap)
+        // Buscamos si el final de 'current' coincide con el inicio de 'incoming'.
+        // Iteramos desde la longitud máxima posible de coincidencia hacia abajo.
+        const maxOverlap = Math.min(currentTrim.length, incoming.length);
+
+        for (let i = maxOverlap; i > 0; i--) {
+            // Tomamos los últimos 'i' caracteres del actual
+            const suffix = currentTrim.slice(-i);
+            // Tomamos los primeros 'i' caracteres del nuevo
+            const prefix = incoming.slice(0, i);
+
+            if (suffix === prefix) {
+                // ¡Encontramos solapamiento!
+                // Retornamos el actual + el nuevo (quitándole la parte repetida)
+                return currentTrim + incoming.slice(i);
+            }
+        }
+
+        // 4. Si no hay solapamiento ni es acumulativo, es un append simple.
+        return current + incoming;
+    }
+
     scrollToBottom() {
-        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+        if (this.chatContainer) {
+            this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+        }
     }
 
     toggleTranscript() {
